@@ -20,9 +20,13 @@
  ;; If there is more than one, they won't work right.
  '(custom-enabled-themes '(misterioso))
  '(global-company-mode t)
+ '(helm-ag-base-command "ag --nocolor --nogroup --ignore-case")
+ '(helm-ag-command-option "--all-text")
+ '(helm-ag-ignore-buffer-patterns '("\\.txt\\'" "\\.mkd\\'"))
+ '(helm-ag-insert-at-point 'symbol)
  '(highlight-symbol-foreground-color "blue")
  '(package-selected-packages
-   '(rainbow-mode monokai-theme jumpc svg-mode-line-themes lsp-mode lin company pdf-tools use-package solarized-theme))
+   '(edit-at-point lsp-mode yasnippet lsp-treemacs helm-lsp projectile hydra flycheck company avy which-key helm-xref dap-mode))
  '(tab-width 4)
  '(tool-bar-mode nil))
 (put 'erase-buffer 'disabled nil)
@@ -88,16 +92,6 @@
      (kill-region (line-beginning-position)
   (line-end-position))
      (message "killed line"))))
-
-
-;;不好用，到时候再优化以下
-(defun delete-cur-word-in-mid-word()
-  (interactive)
-  (progn (forward-word (-  1))
-	 (mark-word)
-	 (delete-region (region-beginning) (region-end))))
-(global-set-key (kbd "C-w") 'delete-cur-word-in-mid-word)
-
 
 
 ;;这个只能放在同一个文件下面操作
@@ -387,17 +381,50 @@
 ;; (add-to-list 'exec-path "D:/Emacs29/.emacs.d/External_Tools/ag")
 (add-to-list 'load-path "~/.emacs.d/External-tools/helm-ag")
 (require 'helm-ag)
-(custom-set-variables
- '(helm-ag-base-command "ag --nocolor --nogroup --ignore-case")
- '(helm-ag-command-option "--all-text")
- '(helm-ag-insert-at-point 'symbol)
- '(helm-ag-ignore-buffer-patterns '("\\.txt\\'" "\\.mkd\\'")
- ;;'(helm-follow-mode-persistent t)
-))
+
 ;;该文件下的文件夹所有文件遍历，如果是想一个.c里面找，C-s
 ;;如果想遍历整个project，直接跳到ag.svn这个根目录
 (global-set-key [f6] 'helm-ag)
 
+
+;; 真TM好东西
+(require 'bind-key)
+(bind-keys
+  ;;真TM好东西，word意义不大，有-就断掉
+  ;; ("C-S-a". edit-at-point-word-copy)
+  ;; ("C-S-b". edit-at-point-word-cut)
+  ;; ("C-S-c". edit-at-point-word-delete)
+  ;; ("C-S-d". edit-at-point-word-paste)
+  ("C-S-a". edit-at-point-symbol-copy)
+  ("C-S-b". edit-at-point-symbol-cut)
+  ("C-S-c". edit-at-point-symbol-delete)
+  ;;替换符号，这个才是我要的东西
+  ("C-S-d". edit-at-point-symbol-paste)
+  ;; ("C-S-e". edit-at-point-symbol-copy)
+  ;; ("C-S-f". edit-at-point-symbol-cut)
+  ;; ("C-S-g". edit-at-point-symbol-delete)
+  ;; ("C-S-h". edit-at-point-symbol-paste)
+  ("C-S-i". edit-at-point-str-copy)
+  ("C-S-j". edit-at-point-str-cut)
+  ("C-S-k". edit-at-point-str-delete)
+  ("C-S-l". edit-at-point-str-paste)
+  ("C-S-m". edit-at-point-line-copy)
+  ("C-S-n". edit-at-point-line-cut)
+  ("C-S-o". edit-at-point-line-delete)
+  ("C-S-p". edit-at-point-line-paste)
+  ("C-S-q". edit-at-point-line-dup)
+  ("C-S-r". edit-at-point-line-up)
+  ("C-S-s". edit-at-point-line-down)
+  ("C-S-t". edit-at-point-paren-copy)
+  ("C-S-u". edit-at-point-paren-cut)
+  ("C-S-v". edit-at-point-paren-delete)
+  ("C-S-w". edit-at-point-paren-paste)
+  ("C-S-x". edit-at-point-paren-dup)
+  ("C-S-y". edit-at-point-defun-copy)
+  ("C-S-z". edit-at-point-defun-cut)
+  ("C-{"  . edit-at-point-defun-delete)
+  ("C-:"  . edit-at-point-defun-paste)
+  ("C-\"" . edit-at-point-defun-dup))
 
 
 ;; (require 'sr-speedbar)
