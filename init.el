@@ -11,13 +11,34 @@
 (put 'upcase-region 'disabled nil)
 
 
+(add-hook 'c-mode-hook
+	  (lambda ()
+	    (fci-mode)
+	    (display-line-numbers-mode)
+	    (line-number-mode)
+	    (column-number-mode)
+	    (whitespace-mode)
+	    (setq c-default-style
+		  '((java-mode . "java")
+		    (awk-mode . "awk")
+		    (other . "linux")))
+	    (setq c-basic-offset 4)
+	    (setq tab-width 4)
+	    (setq backward-delete-char-untabify-method nil)))
+
 
 ;;下面是系统带出来的代码
+;;customize-face带出来的代码
 (custom-set-variables
  ;; custom-set-variables was added by Custom.
  ;; If you edit it by hand, you could mess it up, so be careful.
  ;; Your init file should contain only one such instance.
  ;; If there is more than one, they won't work right.
+ '(c-basic-offset 4)
+ '(company-backends
+   '(company-bbdb company-files
+				  (company-dabbrev-code company-gtags company-etags company-keywords)
+				  company-oddmuse company-dabbrev))
  '(custom-enabled-themes '(misterioso))
  '(global-company-mode t)
  '(helm-ag-base-command "ag --nocolor --nogroup --ignore-case")
@@ -26,7 +47,8 @@
  '(helm-ag-insert-at-point 'symbol)
  '(highlight-symbol-foreground-color "blue")
  '(package-selected-packages
-   '(edit-at-point lsp-mode yasnippet lsp-treemacs helm-lsp projectile hydra flycheck company avy which-key helm-xref dap-mode))
+   '(adjust-parens lsp-mode yasnippet lsp-treemacs helm-lsp projectile hydra flycheck company avy which-key helm-xref dap-mode))
+ '(stupid-indent-level 4)
  '(tab-width 4)
  '(tool-bar-mode nil))
 (put 'erase-buffer 'disabled nil)
@@ -37,9 +59,13 @@
 ;; (add-to-list 'custom-theme-load-path "~/.emacs.d/themes/")
 ;; (load-theme 'monokai t)
 
+(add-to-list 'load-path (expand-file-name "~/.emacs.d/themes"))
+(require 'google-c-style)
+(add-hook 'c-mode-common-hook 'google-set-c-style)
+(add-hook 'c-mode-common-hook 'google-make-newline-indent)
 
 
-
+;;(stupid-indent-mode)
 
 ;;下面这两个是注释快捷键
 ;;第一行是先绑定快捷键为C-x C-/。
@@ -113,6 +139,8 @@
 (global-set-key (kbd "M-o") 'Switching)
 
 
+(local-set-key (kbd "TAB") 'lisp-indent-adjust-parens)
+(local-set-key (kbd "<backtab>") 'lisp-dedent-adjust-parens)
 
 
 (defvar my-keys-minor-mode-map (make-sparse-keymap) "my-keys-minor-mode keymap.")
@@ -120,7 +148,14 @@
 ;;(define-key my-keys-minor-mode-map (kbd "C-`")     'shell-pop)
 (define-key my-keys-minor-mode-map [?\C-c ?\C-c] 'Copyyy())
 (define-key my-keys-minor-mode-map (kbd "C-d")   'Delett())
+
+(define-key my-keys-minor-mode-map (kbd "TAB")   'stupid-indent)
+(define-key my-keys-minor-mode-map (kbd "<backtab>") 'stupid-outdent)
+
 ;;(define-key my-keys-minor-mode-map (kbd "TAB")   'c-indent-line-or-region)
+;;(define-key my-keys-minor-mode-map (kbd "TAB")   'indent-for-tab-command)
+;;(define-key my-keys-minor-mode-map (kbd "TAB")   'lisp-indent-adjust-parens)
+;;(define-key my-keys-minor-mode-map (kbd "<backtab>") 'lisp-dedent-adjust-parens)
 (define-minor-mode my-keys-minor-mode
   "A minor mode so that my key settings override annoying major modes."
   :init-value t :lighter "")
@@ -264,6 +299,8 @@
 
 
 ;; 自动完成：company
+;;改一下自动补全的候选来源company-backends,customize-face(好东西)
+;;参考 https://www.freesion.com/article/28571157303/
 (require 'company)
 (add-hook 'after-init-hook 'global-company-mode); 全局开启
 (setq company-show-numbers t); 显示序号
@@ -356,11 +393,11 @@
 (global-set-key  (kbd "M-<right>") 'xref-go-forward)
 
 
-(lsp-treemacs-sync-mode 1)
+;;(lsp-treemacs-sync-mode 1)
 (global-set-key [f10] 'lsp-treemacs-symbols)
 ;;有一些是C-g能解决
-(global-set-key [f9] 'delete-window)
-
+;;(global-set-key [f9] 'delete-window)
+(global-set-key [f9] 'treemacs)
 
 (projectile-mode +1)
 ;; Recommended keymap prefix on macOS
@@ -391,19 +428,27 @@
 (require 'bind-key)
 (bind-keys
   ;;真TM好东西，word意义不大，有-就断掉
-  ;; ("C-S-a". edit-at-point-word-copy)
-  ;; ("C-S-b". edit-at-point-word-cut)
-  ;; ("C-S-c". edit-at-point-word-delete)
-  ;; ("C-S-d". edit-at-point-word-paste)
+  ;; ("C-S-e". edit-at-point-symbol-copy)
+  ;; ("C-S-f". edit-at-point-symbol-cut)
+  ;; ("C-S-g". edit-at-point-symbol-delete)
+  ;; ("C-S-h". edit-at-point-symbol-paste)
   ("C-S-a". edit-at-point-symbol-copy)
   ("C-S-b". edit-at-point-symbol-cut)
   ("C-S-c". edit-at-point-symbol-delete)
   ;;替换符号，这个才是我要的东西
   ("C-S-d". edit-at-point-symbol-paste)
-  ;; ("C-S-e". edit-at-point-symbol-copy)
-  ;; ("C-S-f". edit-at-point-symbol-cut)
-  ;; ("C-S-g". edit-at-point-symbol-delete)
-  ;; ("C-S-h". edit-at-point-symbol-paste)
+
+  ;; ("C-S-a". edit-at-point-word-copy)
+  ;; ("C-S-b". edit-at-point-word-cut)
+  ;; ("C-S-c". edit-at-point-word-delete)
+  ;; ("C-S-d". edit-at-point-word-paste)
+
+  ;;e被外部调用了
+  ("C-S-f". edit-at-point-word-copy)
+  ("C-S-g". edit-at-point-word-cut)
+  ;;("C-S-g". edit-at-point-word-delete)
+  ("C-S-h". edit-at-point-word-paste)
+
   ("C-S-i". edit-at-point-str-copy)
   ("C-S-j". edit-at-point-str-cut)
   ("C-S-k". edit-at-point-str-delete)
@@ -427,13 +472,20 @@
   ("C-\"" . edit-at-point-defun-dup))
 
 
-;; (require 'sr-speedbar)
-;; speedbar(+展开，-缩回来)指令感觉意义不大，直接tree和helm的C-x C-f直接代替更完美，体验更好
+
+;;没效果
+(require 'stupid-indent-mode)
+
+
+
+	
+
+;;speedbar(+展开，-缩回来)指令感觉意义不大，直接tree和helm的C-x C-f直接代替更完美，体验更好
 ;; (require 'sr-speedbar)
 ;; (setq sr-speedbar-right-side nil)
 ;; (setq sr-speedbar-width 25)
 ;; (setq dframe-update-speed t)
-;; (global-set-key (kbd "<f5>") (lambda()
+;; (global-set-key (kbd "<f9>") (lambda()
 ;;           (interactive)
 ;;           (sr-speedbar-toggle)))
 
