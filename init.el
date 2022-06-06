@@ -11,20 +11,20 @@
 (put 'upcase-region 'disabled nil)
 
 
-(add-hook 'c-mode-hook
-	  (lambda ()
-	    (fci-mode)
-	    (display-line-numbers-mode)
-	    (line-number-mode)
-	    (column-number-mode)
-	    (whitespace-mode)
-	    (setq c-default-style
-		  '((java-mode . "java")
-		    (awk-mode . "awk")
-		    (other . "linux")))
-	    (setq c-basic-offset 4)
-	    (setq tab-width 4)
-	    (setq backward-delete-char-untabify-method nil)))
+;; (add-hook 'c-mode-hook
+;; 	  (lambda ()
+;; 	    (fci-mode)
+;; 	    (display-line-numbers-mode)
+;; 	    (line-number-mode)
+;; 	    (column-number-mode)
+;; 	    (whitespace-mode)
+;; 	    (setq c-default-style
+;; 		  '((java-mode . "java")
+;; 		    (awk-mode . "awk")
+;; 		    (other . "linux")))
+;; 	    (setq c-basic-offset 4)
+;; 	    (setq tab-width 4)
+;; 	    (setq backward-delete-char-untabify-method nil)))
 
 
 ;;下面是系统带出来的代码
@@ -47,10 +47,12 @@
  '(helm-ag-insert-at-point 'symbol)
  '(highlight-symbol-foreground-color "blue")
  '(package-selected-packages
-   '(adjust-parens lsp-mode yasnippet lsp-treemacs helm-lsp projectile hydra flycheck company avy which-key helm-xref dap-mode))
+   '(ccls lsp-mode yasnippet lsp-treemacs helm-lsp projectile hydra flycheck company avy which-key helm-xref dap-mode))
  '(stupid-indent-level 4)
  '(tab-width 4)
- '(tool-bar-mode nil))
+ '(tool-bar-mode nil)
+ '(warning-suppress-log-types '((lsp-mode) (lsp-mode) (lsp-mode)))
+ '(warning-suppress-types '((lsp-mode) (lsp-mode))))
 (put 'erase-buffer 'disabled nil)
 
 ;; (add-to-list 'custom-theme-load-path "~/.emacs.d/themes/")
@@ -58,11 +60,6 @@
 
 ;; (add-to-list 'custom-theme-load-path "~/.emacs.d/themes/")
 ;; (load-theme 'monokai t)
-
-(add-to-list 'load-path (expand-file-name "~/.emacs.d/themes"))
-(require 'google-c-style)
-(add-hook 'c-mode-common-hook 'google-set-c-style)
-(add-hook 'c-mode-common-hook 'google-make-newline-indent)
 
 
 ;;(stupid-indent-mode)
@@ -136,11 +133,9 @@
    (shell-command-to-string
     (concat "Switching "
             (file-truename buffer-file-name)))))
-(global-set-key (kbd "M-o") 'Switching)
-
-
-(local-set-key (kbd "TAB") 'lisp-indent-adjust-parens)
-(local-set-key (kbd "<backtab>") 'lisp-dedent-adjust-parens)
+;;很TM奇怪，怎么失效没法定义了？
+;; (global-set-key (kbd "M-o") 'Switching)
+(global-set-key (kbd "C-1") 'Switching)
 
 
 (defvar my-keys-minor-mode-map (make-sparse-keymap) "my-keys-minor-mode keymap.")
@@ -151,6 +146,12 @@
 
 (define-key my-keys-minor-mode-map (kbd "TAB")   'stupid-indent)
 (define-key my-keys-minor-mode-map (kbd "<backtab>") 'stupid-outdent)
+
+;; 这两个绑定会导致Meta键无效，不知道为啥
+;; (define-key my-keys-minor-mode-map (kbd "C-[") 'forward-sexp)
+;; (define-key my-keys-minor-mode-map (kbd "C-]") 'backward-sexp)
+(define-key my-keys-minor-mode-map (kbd "M-[") 'forward-sexp)
+(define-key my-keys-minor-mode-map (kbd "M-]") 'backward-sexp)
 
 ;;(define-key my-keys-minor-mode-map (kbd "TAB")   'c-indent-line-or-region)
 ;;(define-key my-keys-minor-mode-map (kbd "TAB")   'indent-for-tab-command)
@@ -185,6 +186,7 @@
 
 ;;下面是简书上面学习的
 ;;https://www.jianshu.com/p/42ef1b18d959
+;;如果要更多的包，进入包下载界面之后，输入package-refresh-contents便可，上万个，实在太慢了
 (setq package-archives '(
     ("melpa" . "http://mirrors.tuna.tsinghua.edu.cn/elpa/melpa/") 
     ("gnu" . "http://mirrors.tuna.tsinghua.edu.cn/elpa/gnu/")
@@ -281,7 +283,11 @@
 (global-set-key [f3] 'highlight-symbol-next)
 (global-set-key [f1] 'highlight-symbol-prev)
 (global-set-key [f4] 'highlight-symbol-query-replace)
-
+;; 这个可以用选择区域区代替，但是不如上面那个好用，直接spc下去。！表示全部替代
+;; 不对劲，这个也要，上面那个只能是字符串一整串，下面那个可以任意
+;;这个快捷键是移动一行往上，感觉意义不大，取缔edit-at-point-line-up
+;;算了，C-S-r好像不是这么写，用下面那个把
+(global-set-key (kbd "C-x r") 'replace-string)
 
 ;;这玩意没什么用，自带的ido完全满足(M-x customize 搜索ido)
 ;; (use-package ivy
@@ -382,6 +388,16 @@
   (yas-global-mode))
 
 (lsp-ui-mode)
+
+
+
+;; ((c++-mode . ((flycheck-gcc-include-path . (
+;;                                        "/usr/include"
+;;                                        "/home/cobbliu/thirdparty/gcc-4.9.2/include"
+;;                                        "/home/admin/jinxin/project/include"
+;;                                        "/home/admin/jinxin/project/chunkserver/include")))))
+
+
 ;; 没必要，直接定义一些按钮便可
 ;; ;;M-.
 ;; (define-key lsp-ui-mode-map [remap xref-find-definitions] #'lsp-ui-peek-find-definitions)
@@ -407,12 +423,6 @@
 (global-set-key [f5] 'projectile-find-file)
 
 
-(add-to-list 'load-path "~/.emacs.d/themes/rainbow-identifiers")
-(require 'rainbow-identifiers)
-(add-hook 'prog-mode-hook 'rainbow-identifiers-mode)
-
-
-
 ;;这个安装真的比windows简单多了。在windows下面折腾了一下emacs，发现ubuntu简直神一样简单
 ;;压根不需要加这个路径，直接环境变量就有
 ;; (add-to-list 'exec-path "D:/Emacs29/.emacs.d/External_Tools/ag")
@@ -423,6 +433,13 @@
 ;;如果想遍历整个project，直接跳到ag.svn这个根目录
 (global-set-key [f6] 'helm-ag)
 
+;;emacs自带计算器，更好用，calculator(calc这个不太懂，不如前面那个)
+;;各种转制，B-O-D-H(X)。q退出。计算就是正常计算。
+(global-set-key [f7] 'calculator)
+
+;;好东西，和bind-key双璧
+(require 'stupid-indent-mode)
+;;TAB等按钮重映射到minor-mode里面了
 
 ;; 真TM好东西
 (require 'bind-key)
@@ -443,7 +460,7 @@
   ;; ("C-S-c". edit-at-point-word-delete)
   ;; ("C-S-d". edit-at-point-word-paste)
 
-  ;;e被外部调用了
+  ;;e被外部调用了，去掉e，同时去掉delete
   ("C-S-f". edit-at-point-word-copy)
   ("C-S-g". edit-at-point-word-cut)
   ;;("C-S-g". edit-at-point-word-delete)
@@ -472,13 +489,46 @@
   ("C-\"" . edit-at-point-defun-dup))
 
 
+;; 没啥用，原来找不到头文件，是因为包含了之后就报错了。
+;; LSP-mode已经设置了根目录，所以flycheck能自然找到头文件。估计是ag之类的查找
+;; (add-to-list 'auto-mode-alist '("\\.h\\'" . c-mode))
 
-;;没效果
-(require 'stupid-indent-mode)
 
+;;这个意义也不大
+;;还是TM有意义，treemacs和LSP-Symbols-list转过去
+(require 'window-number)
+(window-number-mode 1)
+(global-set-key  (kbd "C-x o") 'window-number-switch)
+;;妈的，下面那个果然是换位置，这个也还行，就是数字太小
+(global-set-key (kbd "M-o") 'ace-window)
+;; ;;没啥叼用，后续删了吧，ijkl移动意义不大。
+;; (require 'win-switch)
+;; (win-switch-setup-keys-ijkl "\C-xo")
+;;windower这个控件才是需要的,window-jump这个控件好像意义不大，太复杂
+(global-set-key (kbd "<s-tab>") 'windower-switch-to-last-buffer)
+(global-set-key (kbd "<s-o>") 'windower-toggle-single)
+(global-set-key (kbd "s-\\") 'windower-toggle-split)
+;;这个是修改边界大小，少用，去掉
+;; (global-set-key (kbd "<s-M-left>") 'windower-move-border-left)
+;; (global-set-key (kbd "<s-M-down>") 'windower-move-border-below)
+;; (global-set-key (kbd "<s-M-up>") 'windower-move-border-above)
+;; (global-set-key (kbd "<s-M-right>") 'windower-move-border-right)
+;;这个才是跳窗口的好东西
+;; (global-set-key (kbd "<s-S-left>") 'windower-swap-left)
+;; (global-set-key (kbd "<s-S-down>") 'windower-swap-below)
+;; (global-set-key (kbd "<s-S-up>") 'windower-swap-above)
+;; (global-set-key (kbd "<s-S-right>") 'windower-swap-right)
+;; 不知道是啥按钮，换一个
+(global-set-key (kbd "M-j") 'windower-move-border-left)
+(global-set-key (kbd "M-k") 'windower-move-border-below)
+(global-set-key (kbd "M-i") 'windower-move-border-above)
+(global-set-key (kbd "M-l") 'windower-move-border-right)
 
+(global-set-key (kbd "M-J") 'windower-swap-left)
+(global-set-key (kbd "M-K") 'windower-swap-below)
+(global-set-key (kbd "M-I") 'windower-swap-above)
+(global-set-key (kbd "M-L") 'windower-swap-right)
 
-	
 
 ;;speedbar(+展开，-缩回来)指令感觉意义不大，直接tree和helm的C-x C-f直接代替更完美，体验更好
 ;; (require 'sr-speedbar)
@@ -489,4 +539,46 @@
 ;;           (interactive)
 ;;           (sr-speedbar-toggle)))
 
+
+;; 没啥用，直接markdown-mode就完成了
+;; 然后markdown-preview，然后chrome导出pdf，完美，不需要这么多东西
+;; docx后续再说
+;;  (require 'cl)
+;;  ;; Add Packages
+;;  (defvar my/packages '(
+;;         markdown-mode
+;;         ) "Default packages")
+
+;; (defun haotianmichael/markdown-to-html ()
+;;   (interactive)
+;;   (start-process "grip" "*gfm-to-html*" "grip" (buffer-file-name) "5000")
+;;   (browse-url (format "http://localhost:5000/%s.%s" (file-name-base) (file-name-extension (buffer-file-name)))))
+;; (global-set-key (kbd "C-c m")   'haotianmichael/markdown-to-html)  ;给给函数绑定一个快捷键
+
+(add-to-list 'load-path "~/.emacs.d/elpa")  
+(autoload 'markdown-mode "markdown-mode.el"  
+"Major mode for editing Markdown files" t)  
+(setq auto-mode-alist  
+(cons '(".markdown" . markdown-mode) auto-mode-alist))
+
+(global-set-key (kbd "C-c p") 'markdown-preview)
+
+
+;; (add-to-list 'load-path "~/.emacs.d/themes/rainbow-identifiers")
+;; (require 'rainbow-identifiers)
+;; (add-hook 'prog-mode-hook 'rainbow-identifiers-mode)
+;; 下面那个虽然好用，但是好卡啊
+;; 加了这句，完成操作，妈的，那会浪费我2天，果然还是要多读文档
+(require 'ccls)
+(setq ccls-executable "/usr/local/bin/ccls")
+
+(use-package ccls
+  :hook ((c-mode c++-mode objc-mode cuda-mode) .
+         (lambda () (require 'ccls) (lsp))))
+
+(setq ccls-sem-highlight-method 'font-lock)
+;; alternatively, (setq ccls-sem-highlight-method 'overlay)
+
+;; For rainbow semantic highlighting
+(ccls-use-default-rainbow-sem-highlight)
 
